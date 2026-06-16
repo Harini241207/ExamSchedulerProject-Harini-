@@ -1,0 +1,334 @@
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Exam Scheduler</title>
+</head>
+
+<body>
+
+    <h1>Automated Exam Scheduling System</h1>
+
+    <form method="POST">
+
+        <!-- NUMBER OF BRANCHES -->
+
+        <h2>Branch Details</h2>
+
+        <label>Number of Branches:</label>
+
+        <input 
+            type="number" 
+            id="numBranches" 
+            name="numBranches"
+            required
+        >
+
+        <button 
+            type="button" 
+            onclick="generateBranches()"
+        >
+            Generate Branch Inputs
+        </button>
+
+        <br><br>
+
+        <!-- BRANCH INPUTS -->
+
+        <div id="branchInputs"></div>
+
+        <!-- SUBJECT SECTIONS -->
+
+        <div id="subjectSections"></div>
+
+        <!-- CLASSROOM DETAILS -->
+
+        <h2>Classroom Details</h2>
+
+        Number of Classrooms:
+
+        <input 
+            type="number" 
+            id="numRooms"
+            name="num_classrooms"
+            required
+        >
+
+        <br><br>
+
+        Capacity of Each Classroom:
+
+        <input 
+            type="number" 
+            name="capacity"
+            required
+        >
+
+        <br><br>
+
+        <!-- DATE DETAILS -->
+
+        <h2>Exam Start Date</h2>
+
+        Start Date:
+
+        <input 
+            type="date" 
+            name="startdate"
+            required
+        >
+
+        <br><br>
+
+        <!-- SUBMIT BUTTON -->
+
+        <input 
+            type="submit" 
+            value="Generate Timetable"
+        >
+
+    </form>
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+        // ====================================
+        // GENERATE BRANCH INPUTS
+        // ====================================
+
+        function generateBranches() {
+
+            let num =
+                document.getElementById(
+                    "numBranches"
+                ).value;
+
+            let branchContainer =
+                document.getElementById(
+                    "branchInputs"
+                );
+
+            let subjectContainer =
+                document.getElementById(
+                    "subjectSections"
+                );
+
+            // CLEAR PREVIOUS DATA
+
+            branchContainer.innerHTML = "";
+
+            subjectContainer.innerHTML = "";
+
+            // ====================================
+            // CREATE BRANCH INPUTS
+            // ====================================
+
+            for(let i = 1; i <= num; i++) {
+
+                branchContainer.innerHTML += `
+
+                    <hr>
+
+                    <h3>Branch ${i}</h3>
+
+                    Branch Name:
+
+                    <input
+                        type="text"
+                        name="branch${i}"
+                        required
+                    >
+
+                    <br><br>
+
+                    Number of Students:
+
+                    <input
+                        type="number"
+                        name="students${i}"
+                        required
+                    >
+
+                    <br><br>
+
+                `;
+            }
+
+            // ====================================
+            // CREATE SUBJECT SECTIONS
+            // ====================================
+
+            for(let i = 1; i <= num; i++) {
+
+                subjectContainer.innerHTML += `
+
+                    <hr>
+
+                    <h2>
+                        Subjects Common Between 
+                        ${i} Branch${i > 1 ? 'es' : ''}
+                    </h2>
+
+                    Number of Subjects:
+
+                    <input
+                        type="number"
+                        id="subjects${i}"
+                        name="subjects${i}"
+                        oninput="generateSubjectInputs(${i})"
+                        required
+                    >
+
+                    <br><br>
+
+                    <div id="subjectInputs${i}"></div>
+
+                `;
+            }
+        }
+
+        // ====================================
+        // GENERATE SUBJECT INPUTS
+        // ====================================
+
+        function generateSubjectInputs(branchCount) {
+
+            let numSubjects =
+                document.getElementById(
+                    "subjects" + branchCount
+                ).value;
+
+            let container =
+                document.getElementById(
+                    "subjectInputs" + branchCount
+                );
+
+            // CLEAR PREVIOUS SUBJECTS
+
+            container.innerHTML = "";
+
+            // ====================================
+            // CREATE SUBJECT INPUTS
+            // ====================================
+
+            for(let s = 1; s <= numSubjects; s++) {
+
+                let html = `
+
+                    <hr>
+
+                    <h3>Subject ${s}</h3>
+
+                    Subject Name:
+
+                    <input
+                        type="text"
+                        name="subject_${branchCount}_${s}"
+                        required
+                    >
+
+                    <br><br>
+
+                `;
+
+                // ====================================
+                // CREATE BRANCH INPUTS
+                // ====================================
+
+                for(let b = 1; b <= branchCount; b++) {
+
+                    html += `
+
+                        Branch ${b}:
+
+                        <input
+                            type="text"
+                            name="subject_${branchCount}_${s}_branch${b}"
+                            required
+                        >
+
+                        <br><br>
+
+                    `;
+                }
+
+                container.innerHTML += html;
+            }
+        }
+
+    </script>
+   {% if schedule %}
+
+<hr>
+
+<h1>FINAL EXAM TIMETABLE</h1>
+
+{% for day, exams in schedule.items() %}
+
+    <h2>{{ day }}</h2>
+
+    {% if exams %}
+
+        {% for exam in exams %}
+
+            <div style="
+                border:1px solid black;
+                padding:10px;
+                margin-bottom:10px;
+            ">
+
+                <h3>
+                    Subject:
+                    {{ exam.subject }}
+                </h3>
+
+                <p>
+                    Branches:
+                    {{ exam.branches }}
+                </p>
+
+                <p>
+                    Total Students:
+                    {{ exam.students }}
+                </p>
+
+                <h4>Room Allocation:</h4>
+
+                <ul>
+
+                    {% for room, allocation in exam.rooms.items() %}
+
+                        <li>
+
+                            <b>{{ room }}</b>
+
+                            →
+
+                            {{ allocation }}
+
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No exams scheduled</p>
+
+    {% endif %}
+
+{% endfor %}
+
+{% endif %}
+</body>
+
+</html>
+```
+
